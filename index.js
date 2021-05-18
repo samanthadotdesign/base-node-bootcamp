@@ -17,9 +17,6 @@ client.connect();
 
 let sqlQuery = '';
 
-// Helper function query two tables -> owner_id from cats to find the id of owner_name
-// const printCatsTable
-
 switch (userInput) {
   case 'create-owner':
     const ownerName = process.argv[3];
@@ -28,10 +25,22 @@ switch (userInput) {
     break;
 
   case 'create-cat':
-    const ownerId = process.argv[3];
     const catName = process.argv[4];
-    sqlQuery = `INSERT INTO cats (name, owner_id) VALUES ('${catName}','${ownerId}')`;
-    client.query(sqlQuery, whenQueryDone);
+
+    // Create cat by using owner's name
+    // CLI: node index.js create-cat <OWNER_NAME> <CAT_NAME>
+    const ownerNameInput = process.argv[3];
+    // ownerName = 'Jim'
+    console.log(ownerNameInput);
+    const ownerIdQuery = `SELECT id FROM owners WHERE name='${ownerNameInput}'`;
+    // id that I can use inside cats table
+
+    client.query(ownerIdQuery, (ownerError, ownerResult) => {
+      const ownerId = ownerResult.rows[0].id;
+      const catOwnerQuery = `INSERT INTO cats (name, owner_id) VALUES ('${catName}','${ownerId}')`;
+      client.query(catOwnerQuery, whenQueryDone);
+    });
+
     break;
 
   case 'cats':
